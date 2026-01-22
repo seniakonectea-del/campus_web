@@ -1,0 +1,3 @@
+.venv\Scripts\activate
+
+pip install Flask (Instalaciones de FLASK F ramework) 
