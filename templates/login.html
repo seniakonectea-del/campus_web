@@ -3,6 +3,25 @@
 {% block content %}
 
 <h2> Pagina de Login</h2>
-<p> Estoy siendo inyectada desde el login.html</p>
+
+<form  method="POST"  action=" /login">
+
+    <label>Usuario:</label>
+    <input type="text" name="user"><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password"><br></br>
+
+    <label>Color:</label>
+    <input type="Color" name="Color"><br></br>
+
+    <label> Email:</label>
+    <input type="Email" name="Email"><b></b>
+
+    <button type="submit">Entrar</button>
+
+</form>
+
+
 
 {% endblock %}
