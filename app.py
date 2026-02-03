@@ -1,6 +1,16 @@
-from flask import Flask,render_template, request
+from flask import Flask, render_template, request
+import psycopg2
 
 app = Flask(__name__)
+
+def conectarCampus():
+    conn = psycopg2.connect(
+        host="localhost",
+        database="campus",
+        user="postgres",
+        password="admin"
+    )
+    return conn
 
 @app.route("/")
 def hello_world():
@@ -8,25 +18,29 @@ def hello_world():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
         usuario = request.form["user"]
         password = request.form["password"]
         Email = request.form["Email"]
-        Color = request.form["Color"]
 
+        conn = conectarCampus()
+        cursor = conn.cursor()
 
-        print("usuario ingresado:", usuario)
-        print("password ingresado:", password)
+        cursor.execute(
+            'INSERT INTO "Usuarios" (usuario, password, usuario_mail) '
+            'VALUES ( %s, %s, %s)',
+            (usuario, password, Email)
+        )
 
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-        return  render_template("user.html", usuario=usuario,Email=Email, Color=Color)
-    #f"<p>usuario {usuario} ha intentado iniciar sesión. </p>"
-
+        return render_template("user.html", usuario=usuario, Email=Email)
 
     return render_template("login.html")
 
-@app.route("/user") 
+@app.route("/user")
 def hello_user():
     return "<p>Hello, Usuario!</p>"
 
