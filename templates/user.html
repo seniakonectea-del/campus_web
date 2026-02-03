@@ -1,15 +1,133 @@
-{% extends "base.html" %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Usuario</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body.futuristic {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      color: #0f0;
+      position: relative;
+    }
 
-{% block content %}
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
 
+    .card {
+      background: rgba(0, 20, 0, 0.8);
+      backdrop-filter: blur(8px);
+      padding: 28px;
+      border-radius: 4px;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+      width: 320px;
+      text-align: center;
+      border: 2px solid rgba(0, 255, 0, 0.4);
+      position: relative;
+      z-index: 1;
+    }
 
-<p>usuario {{ usuario }} ha intentado iniciar sesión.</p><br>
-<p> Tu correo es:{{ Email }}</p><br>
+    h1 {
+      margin: 0 0 20px 0;
+      text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+      color: #0f0;
+    }
 
+    p {
+      color: rgba(0, 255, 0, 0.7);
+      margin: 10px 0;
+    }
 
+    .btn {
+      margin-top: 10px;
+      padding: 10px 18px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 255, 0, 0.6);
+      cursor: pointer;
+      background: rgba(0, 255, 0, 0.1);
+      color: #0f0;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+      transition: box-shadow .12s, transform .08s;
+      width: 100%;
+    }
 
+    .btn:hover {
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+      background: rgba(0, 255, 0, 0.2);
+    }
 
+    .btn:active, .btn.active {
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.9);
+      transform: translateY(2px) scale(0.995);
+    }
+  </style>
+</head>
+<body class="futuristic">
+  <canvas id="matrixCanvas"></canvas>
+  <div class="card">
+    <h1>Bienvenido, {{ usuario }}</h1>
+    <p>Email: {{ email }}</p>
+    <button class="btn" onclick="alert('Acción de usuario')">Acción</button>
+  </div>
 
+  <script>
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
+    const characters = '01アウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(0);
 
-{% endblock %}
+    function draw() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = characters.charAt(Math.floor(Math.random() * characters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 50);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    document.querySelectorAll('.btn').forEach(b => {
+      b.addEventListener('click', () => { 
+        b.classList.add('active'); 
+        setTimeout(() => b.classList.remove('active'), 200); 
+      });
+    });
+  </script>
+</body>
+</html>

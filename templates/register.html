@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Login</title>
+  <title>Registro</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
@@ -12,7 +12,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(120deg, #020024 0%, #090979 35%, #00d4ff 100%);
+      background: radial-gradient(circle at 10% 20%, #0ff 0%, rgba(0,0,0,0) 10%),
+                  linear-gradient(120deg, #020024 0%, #090979 35%, #00d4ff 100%);
       overflow: hidden;
       font-family: Arial, sans-serif;
       color: #e6f7ff;
@@ -129,29 +130,21 @@
       margin: 0 0 20px 0;
       text-shadow: 0 0 10px rgba(0,212,255,0.5);
     }
-
-    p a {
-      color: #00e5ff;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    p a:hover {
-      text-decoration: underline;
-      text-shadow: 0 0 8px rgba(0,229,255,0.8);
-    }
   </style>
 </head>
 <body class="futuristic">
   <div class="card">
-    <h1>Iniciar sesión</h1>
-    <form action="{{ url_for('login') }}" method="post">
-      <input name="user" placeholder="Usuario" required>
-      <input name="Email" placeholder="Email (opcional)">
-      <input name="password" type="password" placeholder="Contraseña" required>
-      <button class="btn" type="submit">Entrar</button>
+    <h1>Registro</h1>
+    <form action="{{ url_for('register') }}" method="post">
+        <input name="nombre" placeholder="Nombre" required>
+        <input name="apellidos" placeholder="Apellidos" required>
+        <input name="edad" type="number" placeholder="Edad" required>
+        <input name="email" placeholder="Email" value="{{ pre_email }}" required>
+        <input name="password" type="password" placeholder="Contraseña" required>
+        <input name="telefono" placeholder="Teléfono">
+        <input name="usuario" placeholder="Elegir nombre de usuario" value="{{ pre_user }}" required>
+      <button class="btn" type="submit">Crear cuenta</button>
     </form>
-    <p>¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate</a></p>
   </div>
   <script>
     document.querySelectorAll('.btn').forEach(b=>{
