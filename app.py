@@ -1,16 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "change_this_secret"
 
 def conectarCampus():
     conn = psycopg2.connect(
-        host="localhost",
-        database="campus",
-        user="postgres",
-        password="admin"
+        host=os.getenv("DB_host"),
+        database=os.getenv("DB_NAME"),
+        user=os.getenv("DB_user"),
+        password=os.getenv("DB_password")
     )
     return conn
 
@@ -45,21 +49,17 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        nombre = request.form.get("nombre", "").strip()
-        apellidos = request.form.get("apellidos", "").strip()
-        edad = request.form.get("edad", None)
         usuario = request.form.get("usuario", "").strip()
-        email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
-        telefono = request.form.get("telefono", "").strip()
+        email = request.form.get("email", "").strip()
         
-        password_hash = generate_password_hash(password)
+        password_hash = generate_password_hash(password) # Esro incripta la clave
 
         conn = conectarCampus()
         cursor = conn.cursor()
         cursor.execute(
-            'INSERT INTO "Usuarios" (nombre, apellidos, edad, usuario, password, usuario_mail, telefono) VALUES (%s,%s,%s,%s,%s,%s,%s)',
-            (nombre, apellidos, edad, usuario, password_hash, email, telefono)
+            'INSERT INTO "Usuarios" ( usuario, password, usuario_mail) VALUES (%s,%s,%s)',
+            ( usuario, password_hash, email)
         )
         conn.commit()
         cursor.close()
@@ -67,7 +67,7 @@ def register():
 
         return render_template("user.html", usuario=usuario, email=email)
 
-    # GET: mostrar formulario; permitir prellenar user/email desde query params
+        #GET: mostrar formulario; permitir prellenar user/email desde query params
     pre_email = request.args.get("email", "")
     pre_user = request.args.get("user", "")
     return render_template("register.html", pre_email=pre_email, pre_user=pre_user)
