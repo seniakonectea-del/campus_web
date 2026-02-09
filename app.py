@@ -1,13 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 from dotenv import load_dotenv
+from datetime import timedelta
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "change_this_secret"
+app.permanent_session_lifetime = timedelta(minutes=30)
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 
 def conectarCampus():
     conn = psycopg2.connect(
@@ -42,6 +48,9 @@ def login():
     if row:
         db_nombre, db_email, db_hash = row
         if check_password_hash(db_hash, password):
+            session['user_id'] = db_nombre
+            session['user_email'] = db_email
+            session.permanent = True
             return render_template("user.html", usuario=db_nombre, email=db_email)
     # si no existe o contraseña incorrecta -> redirigir a registro con parámetros prellenados
     return redirect(url_for("register", email=email, user=usuario))
@@ -65,6 +74,9 @@ def register():
         cursor.close()
         conn.close()
 
+        session['user_id'] = usuario
+        session['user_email'] = email
+        session.permanent = True
         return render_template("user.html", usuario=usuario, email=email)
 
         #GET: mostrar formulario; permitir prellenar user/email desde query params
@@ -79,6 +91,17 @@ def hello_user():
 @app.route("/user/logged")
 def logged_user():
     return render_template("User_Custom.html")
+
+@app.route('/keepalive', methods=['GET', 'POST'])
+def keepalive():
+    if not session.get('user_id'):
+        return jsonify({'ok': False}), 401
+    return jsonify({'ok': True})
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'ok': True})
 
 if __name__ == "__main__":
     app.run(debug=True)

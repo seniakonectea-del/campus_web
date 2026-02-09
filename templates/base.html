@@ -9,5 +9,29 @@
     <h1> Campus Konectia</h1>
 
     {% block content %}{% endblock %}
+
+    <script>
+        // Mantener sesión activa: ping cada 5 minutos
+        const __KEEPALIVE_INTERVAL = 5 * 60 * 1000;
+        const __keepAliveTimer = setInterval(() => {
+            fetch('{{ url_for("keepalive") }}', { method: 'POST', credentials: 'include' })
+                .then(r => {
+                    if (r.status === 401) {
+                        clearInterval(__keepAliveTimer);
+                        window.location = '{{ url_for("index") }}';
+                    }
+                })
+                .catch(() => {});
+        }, __KEEPALIVE_INTERVAL);
+
+        async function logoutUser() {
+            try {
+                await fetch('{{ url_for("logout") }}', { method: 'POST', credentials: 'include' });
+            } finally {
+                clearInterval(__keepAliveTimer);
+                window.location = '{{ url_for("index") }}';
+            }
+        }
+    </script>
 </body>
 </html>
