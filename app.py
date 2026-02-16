@@ -18,6 +18,7 @@ def make_session_permanent():
 def conectarCampus():
     conn = psycopg2.connect(
         host=os.getenv("DB_host"),
+        host=os.getenv("DB_PORT"),
         database=os.getenv("DB_NAME"),
         user=os.getenv("DB_user"),
         password=os.getenv("DB_password")
