@@ -1,129 +1,203 @@
-# campus_web
+# 🎓 Campus Web
 
-Proyecto de formación: aplicación web básica para gestión de usuarios usada como ejemplo didáctico.
+Aplicación web para la gestión de usuarios y eventos académicos, desarrollada con **Python + Flask** y **PostgreSQL**.
 
-**Descripción**
+🔗 **Despliegue en Railway:** `[AÑADIR URL AQUÍ TRAS EL DESPLIEGUE]`  
+📦 **Repositorio:** https://github.com/seniakonectea-del/campus_web
 
-`campus_web` es un proyecto de formación que muestra una aplicación en Flask con vistas en HTML/CSS y persistencia en PostgreSQL. Está pensado para aprender a construir una app web completa (servidor, plantillas, gestión de sesiones y base de datos).
+---
 
-**Tecnologías implicadas**
+## 📋 Descripción del proyecto
 
-- HTML, CSS
-- Python
-- Flask
-- PostgreSQL
-- psycopg2 (conector PostgreSQL para Python)
-- python-dotenv (gestión de variables de entorno)
+Campus Web es una plataforma académica que permite gestionar usuarios con diferentes niveles de acceso (administrador, profesor y alumno) y un calendario de eventos del campus con filtros avanzados por fecha.
 
-**Requisitos previos**
+---
 
-- Python 3.10+ instalado
-- Git
-- PostgreSQL (servidor instalado y `psql` disponible)
+## 🗂️ Estructura del proyecto
 
-**Clonar el repositorio**
+```
+campus_web/
+├── app.py                  # Entry point: crea la app Flask y registra blueprints
+├── config.py               # Configuración centralizada (variables de entorno)
+├── db.py                   # Conexión a PostgreSQL e inicialización de tablas
+├── crear_admin.py          # Script para crear el usuario admin inicial
+├── schema.sql              # Script SQL de la base de datos
+│
+├── models/
+│   ├── __init__.py
+│   ├── usuario.py          # Clase Usuario (POO + CRUD)
+│   └── evento.py           # Clase Evento (POO + CRUD + filtros)
+│
+├── controllers/
+│   ├── __init__.py
+│   ├── auth.py             # Login, registro, logout
+│   ├── auth_utils.py       # Decoradores: login_required, rol_requerido
+│   ├── dashboard.py        # Dashboard por rol
+│   ├── eventos.py          # CRUD de eventos + filtros por fecha
+│   └── admin.py            # Gestión de usuarios (solo admin)
+│
+├── templates/
+│   ├── base.html           # Layout base con navbar dinámica por rol
+│   ├── auth/               # Login y registro
+│   ├── dashboard/          # Vistas por rol (admin, profesor, alumno)
+│   ├── eventos/            # Lista con filtros + formulario
+│   └── admin/              # Gestión de usuarios
+│
+├── static/
+│   └── css/style.css       # Estilos globales responsive
+│
+├── requirements.txt
+├── Procfile                # Configuración gunicorn para Railway
+├── runtime.txt
+├── .env.example            # Plantilla de variables de entorno
+└── .gitignore
+```
+
+---
+
+## 🧱 Aplicación de Programación Orientada a Objetos (POO)
+
+El proyecto aplica POO de forma explícita y estructurada:
+
+### Clase `Usuario` (`models/usuario.py`)
+Encapsula toda la lógica de un usuario del sistema:
+- **Atributos:** `id`, `nombre`, `email`, `password`, `rol`, `creado`
+- **Propiedades:** `es_admin`, `es_profesor`, `es_alumno` (getters limpios)
+- **Métodos de clase (factory):** `crear()`, `buscar_por_email()`, `buscar_por_id()`, `listar_todos()`
+- **Métodos de instancia:** `actualizar()`, `eliminar()`, `verificar_password()`, `to_dict()`
+
+### Clase `Evento` (`models/evento.py`)
+Encapsula la lógica de eventos académicos:
+- **Atributos:** `id`, `titulo`, `descripcion`, `fecha_inicio`, `fecha_fin`, `creado_por`, `visible_para`
+- **Métodos de clase:** `crear()`, `buscar_por_id()`, `listar_todos()`, `listar_para_rol()`, `filtrar_por_fechas()`
+- **Métodos de instancia:** `actualizar()`, `eliminar()`, `to_dict()`
+
+### Separación de responsabilidades
+| Capa | Responsabilidad |
+|---|---|
+| `models/` | Lógica de negocio y acceso a datos |
+| `controllers/` | Rutas HTTP y lógica de presentación |
+| `templates/` | Renderizado HTML (Jinja2) |
+| `db.py` | Conexión y gestión de la BD |
+| `config.py` | Configuración centralizada |
+
+---
+
+## 🗄️ Base de datos (PostgreSQL)
+
+### Tabla `usuarios`
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | SERIAL PK | Identificador único |
+| `nombre` | VARCHAR(100) | Nombre completo |
+| `email` | VARCHAR(255) UNIQUE | Email de acceso |
+| `password` | VARCHAR(255) | Hash werkzeug |
+| `rol` | VARCHAR(20) | `admin`, `profesor` o `alumno` |
+| `creado` | TIMESTAMP | Fecha de registro |
+
+### Tabla `eventos`
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | SERIAL PK | Identificador único |
+| `titulo` | VARCHAR(200) | Nombre del evento |
+| `descripcion` | TEXT | Descripción opcional |
+| `fecha_inicio` | TIMESTAMP | Inicio del evento |
+| `fecha_fin` | TIMESTAMP | Fin del evento (opcional) |
+| `creado_por` | INTEGER FK → `usuarios.id` | Quién creó el evento |
+| `visible_para` | VARCHAR(20) | `todos`, `profesor` o `alumno` |
+| `creado` | TIMESTAMP | Fecha de creación |
+
+**Relación:** `eventos.creado_por` → `usuarios.id` (clave foránea con `ON DELETE SET NULL`)
+
+---
+
+## 👥 Roles y permisos
+
+| Acción | Alumno | Profesor | Admin |
+|---|:---:|:---:|:---:|
+| Ver eventos | ✅ | ✅ | ✅ |
+| Crear eventos | ❌ | ✅ | ✅ |
+| Editar eventos | ❌ | ❌ | ✅ |
+| Eliminar eventos | ❌ | ❌ | ✅ |
+| Ver panel de usuarios | ❌ | ❌ | ✅ |
+| Editar usuarios | ❌ | ❌ | ✅ |
+| Filtrar eventos por fecha | ✅ | ✅ | ✅ |
+
+La restricción de acceso se implementa con decoradores reutilizables en `controllers/auth_utils.py`:
+- `@login_required` — redirige al login si no hay sesión
+- `@rol_requerido("admin", "profesor")` — restringe por rol
+
+---
+
+## ✨ Mejora personal: Filtros avanzados por fecha
+
+Se ha implementado un sistema de **filtrado de eventos por rango de fechas** como mejora personal:
+
+- Ubicación: `controllers/eventos.py` → método `lista()` y `models/evento.py` → `filtrar_por_fechas()`
+- Interfaz: barra de filtros en `templates/eventos/lista.html`
+- Funcionalidad: el usuario puede filtrar eventos indicando una fecha de inicio (`desde`) y/o una fecha de fin (`hasta`)
+- La consulta SQL se construye dinámicamente añadiendo cláusulas `WHERE` solo cuando se proporcionan fechas
+- Compatible con todos los roles (respeta la visibilidad del evento según el rol del usuario)
+
+---
+
+## 🚀 Instalación local
 
 ```bash
+# 1. Clonar el repositorio
 git clone https://github.com/seniakonectea-del/campus_web.git
 cd campus_web
-```
 
-**Crear y activar entorno virtual**
-
-- PowerShell:
-```powershell
+# 2. Crear entorno virtual
 python -m venv .venv
-& .venv\Scripts\Activate.ps1
-```
-- CMD:
-```cmd
-python -m venv .venv
-.venv\Scripts\activate.bat
-```
-- Bash/WSL:
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
+source .venv/bin/activate        # Linux/Mac
+# .venv\Scripts\activate.bat     # Windows CMD
 
-**Instalar dependencias**
-
-```bash
+# 3. Instalar dependencias
 pip install -r requirements.txt
-```
 
-**Variables de entorno (.env)**
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Edita .env con tus credenciales de PostgreSQL
 
-Cree un archivo `.env` en la raíz del proyecto con las credenciales de la base de datos y, opcionalmente, la clave secreta de Flask. Ejemplo:
+# 5. Crear usuario admin inicial
+python crear_admin.py
 
-```
-DB_host=localhost
-DB_NAME=campusdb
-DB_user=campus_user
-DB_password=tu_password_segura
-FLASK_SECRET=un_valor_secreto
-```
-
-En `app.py` el proyecto lee `DB_host`, `DB_NAME`, `DB_user` y `DB_password`.
-
-**Crear la base de datos (PostgreSQL)**
-
-Ejemplos de comandos con `psql` (ejecutar como usuario administrador de postgres o con permisos):
-
-1) Crear usuario y base de datos:
-
-```sql
--- En psql:
-CREATE USER campus_user WITH PASSWORD 'tu_password_segura';
-CREATE DATABASE campusdb OWNER campus_user;
-```
-
-2) Conectar a la base de datos y crear la tabla `Usuarios` requerida por la app:
-
-```sql
--- Conectarse:
-\c campusdb
--- Crear tabla (nombre con mayúsculas como usa la app):
-CREATE TABLE "Usuarios" (
-  id SERIAL PRIMARY KEY,
-  usuario VARCHAR(255) UNIQUE NOT NULL,
-  usuario_mail VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL
-);
-```
-
-Si prefieres hacerlo todo desde la línea de comandos (Windows PowerShell / Bash):
-
-```bash
-# Crear usuario y DB (ejecutar como postgres o usando psql con un superusuario)
-psql -U postgres -c "CREATE USER campus_user WITH PASSWORD 'tu_password_segura';"
-psql -U postgres -c "CREATE DATABASE campusdb OWNER campus_user;"
-psql -U campus_user -d campusdb -c "CREATE TABLE \"Usuarios\" (id SERIAL PRIMARY KEY, usuario VARCHAR(255) UNIQUE NOT NULL, usuario_mail VARCHAR(255) UNIQUE NOT NULL, password VARCHAR(255) NOT NULL);"
-```
-
-**Ejecutar la aplicación**
-
-Con el entorno virtual activado y el `.env` creado:
-
-```bash
+# 6. Arrancar la aplicación
 python app.py
 ```
 
-La app por defecto corre en `http://127.0.0.1:5000`.
+La app estará disponible en `http://127.0.0.1:5000`
 
-**Notas y recomendaciones**
+**Credenciales admin por defecto:**
+- Email: `admin@campus.com`
+- Password: `admin123`
 
-- El archivo `requirements.txt` incluye las dependencias con versiones fijadas. Puedes eliminar `psycopg2` y mantener solo `psycopg2-binary` si prefieres evitar compilar extensiones nativas.
-- Cambia `app.secret_key` por la variable de entorno `FLASK_SECRET` o similar para producción.
-- Para despliegues y reproducibilidad, considera usar `docker-compose` con un servicio `postgres` o herramientas como `pip-tools` / `poetry`.
+---
 
-Si quieres, puedo:
-- Generar un `docker-compose.yml` para levantar la app + PostgreSQL rápidamente.
-- Simplificar `requirements.txt` quitando duplicados.
+## ☁️ Despliegue en Railway
 
-<a href="https://github.com/seniakonectea-del/campus_web">Campus_web</a> © 2026 by 
-<a href="https://ejemplo.com">Senia Rasel</a> is licensed under 
-<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
-<img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
-<img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
-<img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+1. Haz push del proyecto a GitHub
+2. En [railway.app](https://railway.app), crea un nuevo proyecto → *Deploy from GitHub repo*
+3. Añade un servicio **PostgreSQL** desde el dashboard de Railway
+4. En las variables de entorno del servicio web, configura:
+   - `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` (valores del servicio PostgreSQL de Railway)
+   - `FLASK_SECRET` → un valor secreto largo y aleatorio
+5. Railway usará el `Procfile` para arrancar con `gunicorn`
+6. Las tablas se crean automáticamente al arrancar (`init_db()` en `app.py`)
+7. Ejecuta `python crear_admin.py` desde Railway Shell para crear el admin
+
+---
+
+## 🛠️ Tecnologías
+
+- **Python 3.11** + **Flask 3.0**
+- **PostgreSQL** + **psycopg2-binary**
+- **Werkzeug** (hashing de contraseñas)
+- **Jinja2** (templates)
+- **Gunicorn** (servidor WSGI para producción)
+- **Railway** (despliegue en la nube)
+
+---
+
+Campus Web © 2026 · Senia Rasel · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)

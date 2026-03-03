@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Panel Profesor – Campus Web{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>📚 Panel de Profesor</h1>
+  <p>Bienvenido, <strong>{{ session.user_nombre }}</strong>.</p>
+</div>
+
+<div class="cards-grid">
+  <div class="card card-green">
+    <h3>📅 Calendario</h3>
+    <p>Consulta y crea eventos académicos.</p>
+    <a href="{{ url_for('eventos.lista') }}" class="btn btn-white">Ver eventos</a>
+  </div>
+  <div class="card card-purple">
+    <h3>➕ Nuevo Evento</h3>
+    <p>Añade un nuevo evento al calendario.</p>
+    <a href="{{ url_for('eventos.nuevo') }}" class="btn btn-white">Crear evento</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>📅 Eventos del campus</h2>
+  {% if eventos %}
+    <table class="table">
+      <thead>
+        <tr><th>Título</th><th>Fecha inicio</th><th>Visible para</th></tr>
+      </thead>
+      <tbody>
+        {% for e in eventos %}
+        <tr>
+          <td>{{ e.titulo }}</td>
+          <td>{{ e.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td><span class="badge badge-{{ e.visible_para }}">{{ e.visible_para }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">No hay eventos disponibles.</p>
+  {% endif %}
+</div>
+{% endblock %}

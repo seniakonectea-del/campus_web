@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Eventos – Campus Web{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <h1>📅 Calendario de Eventos</h1>
+  {% if session.user_rol in ['admin', 'profesor'] %}
+    <a href="{{ url_for('eventos.nuevo') }}" class="btn btn-primary">+ Nuevo evento</a>
+  {% endif %}
+</div>
+
+<!-- Filtros por fecha: mejora personal -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('eventos.lista') }}" class="filter-form">
+    <div class="form-group-inline">
+      <label for="desde">Desde</label>
+      <input type="date" id="desde" name="desde" value="{{ desde }}" />
+    </div>
+    <div class="form-group-inline">
+      <label for="hasta">Hasta</label>
+      <input type="date" id="hasta" name="hasta" value="{{ hasta }}" />
+    </div>
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+    {% if desde or hasta %}
+      <a href="{{ url_for('eventos.lista') }}" class="btn btn-outline">Limpiar</a>
+    {% endif %}
+  </form>
+</div>
+
+{% if eventos %}
+  <div class="table-wrapper">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Descripción</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Visible para</th>
+          {% if session.user_rol == 'admin' %}<th>Acciones</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in eventos %}
+        <tr>
+          <td><strong>{{ e.titulo }}</strong></td>
+          <td>{{ e.descripcion or '—' }}</td>
+          <td>{{ e.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ e.fecha_fin.strftime('%d/%m/%Y %H:%M') if e.fecha_fin else '—' }}</td>
+          <td><span class="badge badge-{{ e.visible_para }}">{{ e.visible_para }}</span></td>
+          {% if session.user_rol == 'admin' %}
+          <td>
+            <a href="{{ url_for('eventos.editar', evento_id=e.id) }}" class="btn btn-sm btn-secondary">Editar</a>
+            <form method="POST" action="{{ url_for('eventos.eliminar', evento_id=e.id) }}" style="display:inline"
+                  onsubmit="return confirm('¿Eliminar este evento?')">
+              <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <p>No se encontraron eventos{% if desde or hasta %} con los filtros aplicados{% endif %}.</p>
+    {% if desde or hasta %}
+      <a href="{{ url_for('eventos.lista') }}" class="btn btn-outline">Ver todos los eventos</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

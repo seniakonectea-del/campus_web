@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>{% if event %}Editar evento{% else %}Nuevo evento{% endif %}</h2>
+  <form method="post">
+    <label>Título<br><input name="title" value="{{ event.title if event else '' }}" required></label><br>
+    <label>Descripción<br><textarea name="description">{{ event.description if event else '' }}</textarea></label><br>
+    <label>Fecha y hora<br><input type="datetime-local" name="date" value="{{ event.event_date.strftime('%Y-%m-%dT%H:%M') if event else '' }}" required></label><br>
+    <button type="submit">Guardar</button>
+  </form>
+{% endblock %}

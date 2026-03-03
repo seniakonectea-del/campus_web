@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Mi Panel – Campus Web{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>🎓 Mi Panel</h1>
+  <p>Bienvenido, <strong>{{ session.user_nombre }}</strong>. Aquí puedes ver tus eventos académicos.</p>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <h2>📅 Próximos eventos</h2>
+    <a href="{{ url_for('eventos.lista') }}" class="btn btn-secondary">Ver todos</a>
+  </div>
+
+  {% if eventos %}
+    <div class="eventos-grid">
+      {% for e in eventos %}
+      <div class="evento-card">
+        <div class="evento-fecha">{{ e.fecha_inicio.strftime('%d %b') }}</div>
+        <div class="evento-info">
+          <h4>{{ e.titulo }}</h4>
+          {% if e.descripcion %}
+            <p>{{ e.descripcion }}</p>
+          {% endif %}
+          <small>{{ e.fecha_inicio.strftime('%H:%M') }}
+            {% if e.fecha_fin %} – {{ e.fecha_fin.strftime('%H:%M') }}{% endif %}
+          </small>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No hay eventos disponibles en este momento.</p>
+  {% endif %}
+</div>
+{% endblock %}

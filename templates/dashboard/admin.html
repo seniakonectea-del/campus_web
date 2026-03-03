@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Panel Admin – Campus Web{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h1>⚙️ Panel de Administrador</h1>
+  <p>Bienvenido, <strong>{{ session.user_nombre }}</strong>. Tienes acceso completo al sistema.</p>
+</div>
+
+<div class="cards-grid">
+  <div class="card card-blue">
+    <h3>👥 Gestión de Usuarios</h3>
+    <p>Administra alumnos, profesores y otros administradores.</p>
+    <a href="{{ url_for('admin.usuarios') }}" class="btn btn-white">Ver usuarios</a>
+  </div>
+  <div class="card card-green">
+    <h3>📅 Calendario de Eventos</h3>
+    <p>Crea, edita y elimina eventos del campus.</p>
+    <a href="{{ url_for('eventos.lista') }}" class="btn btn-white">Ver eventos</a>
+  </div>
+  <div class="card card-purple">
+    <h3>➕ Nuevo Evento</h3>
+    <p>Añade un nuevo evento al calendario académico.</p>
+    <a href="{{ url_for('eventos.nuevo') }}" class="btn btn-white">Crear evento</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>📅 Próximos eventos</h2>
+  {% if eventos %}
+    <table class="table">
+      <thead>
+        <tr><th>Título</th><th>Fecha inicio</th><th>Visible para</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for e in eventos[:5] %}
+        <tr>
+          <td>{{ e.titulo }}</td>
+          <td>{{ e.fecha_inicio.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td><span class="badge badge-{{ e.visible_para }}">{{ e.visible_para }}</span></td>
+          <td>
+            <a href="{{ url_for('eventos.editar', evento_id=e.id) }}" class="btn btn-sm btn-secondary">Editar</a>
+            <form method="POST" action="{{ url_for('eventos.eliminar', evento_id=e.id) }}" style="display:inline"
+                  onsubmit="return confirm('¿Eliminar este evento?')">
+              <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if eventos|length > 5 %}
+      <a href="{{ url_for('eventos.lista') }}">Ver todos los eventos →</a>
+    {% endif %}
+  {% else %}
+    <p class="text-muted">No hay eventos registrados aún.</p>
+  {% endif %}
+</div>
+{% endblock %}

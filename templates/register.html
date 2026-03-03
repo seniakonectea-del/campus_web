@@ -124,6 +124,13 @@
          <input name="usuario" placeholder="Elegir nombre de usuario" value="{{ pre_user }}" required>
          <input name="password" type="password" placeholder="Contraseña" required>
          <input name="email" placeholder="Email" value="{{ pre_email }}" required>
+      {% if session.get('user_role') == 'Administrador' %}
+        <select name="role" required>
+          <option value="Alumno">Alumno</option>
+          <option value="Profesor">Profesor</option>
+          <option value="Administrador">Administrador</option>
+        </select>
+      {% endif %}
       <button class="btn" type="submit">Crear cuenta</button>
     </form>
   </div>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ accion }} Evento – Campus Web{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <h1>{{ accion }} Evento</h1>
+
+  <form method="POST">
+    <div class="form-group">
+      <label for="titulo">Título *</label>
+      <input type="text" id="titulo" name="titulo" required
+             value="{{ evento.titulo if evento else '' }}" />
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" name="descripcion" rows="3">{{ evento.descripcion if evento else '' }}</textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="fecha_inicio">Fecha y hora de inicio *</label>
+        <input type="datetime-local" id="fecha_inicio" name="fecha_inicio" required
+               value="{{ evento.fecha_inicio.strftime('%Y-%m-%dT%H:%M') if evento else '' }}" />
+      </div>
+      <div class="form-group">
+        <label for="fecha_fin">Fecha y hora de fin</label>
+        <input type="datetime-local" id="fecha_fin" name="fecha_fin"
+               value="{{ evento.fecha_fin.strftime('%Y-%m-%dT%H:%M') if evento and evento.fecha_fin else '' }}" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="visible_para">Visible para</label>
+      <select id="visible_para" name="visible_para">
+        <option value="todos"    {% if evento and evento.visible_para == 'todos'    %}selected{% endif %}>Todos</option>
+        <option value="profesor" {% if evento and evento.visible_para == 'profesor' %}selected{% endif %}>Solo profesores</option>
+        <option value="alumno"   {% if evento and evento.visible_para == 'alumno'   %}selected{% endif %}>Solo alumnos</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ accion }} Evento</button>
+      <a href="{{ url_for('eventos.lista') }}" class="btn btn-outline">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

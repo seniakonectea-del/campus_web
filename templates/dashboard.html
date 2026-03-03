@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Hola {{ usuario }} ({{ role }})</h2>
+  {% if notifications %}
+    <p><strong>¡Tienes {{ notifications }} evento(s) en las próximas 24h!</strong></p>
+  {% endif %}
+  <p>Email: {{ email }}</p>
+  <nav>
+    <a href="{{ url_for('create_event') }}">Crear evento</a> |
+    {% if role == 'Administrador' %}
+      <a href="{{ url_for('admin_users') }}">Gestión de usuarios</a> |
+    {% endif %}
+    <button onclick="logoutUser()">Cerrar sesión</button>
+  </nav>
+
+  <h3>Lista de eventos</h3>
+  <ul>
+    {% for ev in events %}
+      <li>
+        <strong>{{ ev.title }}</strong> - {{ ev.event_date }}
+        {% if role=='Administrador' or ev.owner_id == session.get('user_id') %}
+          [<a href="{{ url_for('edit_event', eid=ev.id) }}">editar</a>]
+          {% if role=='Administrador' %}[<a href="#" onclick="document.getElementById('del{{ev.id}}').submit()">borrar</a>]
+          <form id="del{{ev.id}}" action="{{ url_for('delete_event', eid=ev.id) }}" method="post" style="display:none;"></form>{% endif %}
+        {% endif %}
+      </li>
+    {% else %}
+      <li>No hay eventos aún.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

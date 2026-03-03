@@ -1,39 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campus Konectia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Campus Web{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
 </head>
 <body>
-    <h1> Campus Konectia</h1>
 
-    {% block content %}{% endblock %}
+{% if session.user_id %}
+<nav class="navbar">
+  <div class="nav-brand">🎓 Campus Web</div>
+  <div class="nav-links">
+    <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+    <a href="{{ url_for('eventos.lista') }}">Eventos</a>
+    {% if session.user_rol in ['admin', 'profesor'] %}
+      <a href="{{ url_for('eventos.nuevo') }}">+ Evento</a>
+    {% endif %}
+    {% if session.user_rol == 'admin' %}
+      <a href="{{ url_for('admin.usuarios') }}">Usuarios</a>
+    {% endif %}
+  </div>
+  <div class="nav-user">
+    <span class="badge badge-{{ session.user_rol }}">{{ session.user_rol }}</span>
+    <span>{{ session.user_nombre }}</span>
+    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Cerrar sesión</a>
+  </div>
+</nav>
+{% endif %}
 
-        <iframe width="600" height="450" style="border:0" loading="lazy" allowfullscreen
-        src="https://www.google.com/maps/embed/v1/place?q=place_id:ChIJ78ddXa5LSQ0RNSKO1YA6Go8&key=AIzaSyCGpveplM4ZYNIFuk9eQfnIg0IA80qhzpI"></iframe>
-        <script>
-        // Mantener sesión activa: ping cada 5 minutos
-        const __KEEPALIVE_INTERVAL = 5 * 60 * 1000;
-        const __keepAliveTimer = setInterval(() => {
-            fetch('{{ url_for("keepalive") }}', { method: 'POST', credentials: 'include' })
-                .then(r => {
-                    if (r.status === 401) {
-                        clearInterval(__keepAliveTimer);
-                        window.location = '{{ url_for("index") }}';
-                    }
-                })
-                .catch(() => {});
-        }, __KEEPALIVE_INTERVAL);
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-        async function logoutUser() {
-            try {
-                await fetch('{{ url_for("logout") }}', { method: 'POST', credentials: 'include' });
-            } finally {
-                clearInterval(__keepAliveTimer);
-                window.location = '{{ url_for("index") }}';
-            }
-        }
-    </script>
+  {% block content %}{% endblock %}
+</main>
+
 </body>
 </html>
