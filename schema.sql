@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email    VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     rol      VARCHAR(20)  NOT NULL DEFAULT 'alumno'
-             CHECK (rol IN ('admin', 'profesor', 'alumno')),
+             CHECK (rol IN ('administrador', 'profesor', 'alumno')),
     creado   TIMESTAMP DEFAULT NOW()
 );
 
@@ -34,7 +34,7 @@ VALUES (
     'Administrador',
     'admin@campus.com',
     'scrypt:32768:8:1$salt$hash_placeholder',
-    'admin'
+    'administrador'
 ) ON CONFLICT (email) DO NOTHING;
 
 -- Nota: reemplaza el hash anterior ejecutando en Python:

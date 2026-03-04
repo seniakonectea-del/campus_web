@@ -16,7 +16,7 @@ class Usuario:
     # ── Propiedades de rol ──────────────────────────────────────────────────
     @property
     def es_admin(self):
-        return self.rol == "admin"
+        return self.rol == "administrador"
 
     @property
     def es_profesor(self):

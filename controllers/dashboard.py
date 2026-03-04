@@ -11,7 +11,7 @@ def index():
     rol     = session.get("user_rol")
     eventos = Evento.listar_para_rol(rol)
 
-    if rol == "admin":
+    if rol == "administrador":
         return render_template("dashboard/admin.html", eventos=eventos)
     elif rol == "profesor":
         return render_template("dashboard/profesor.html", eventos=eventos)

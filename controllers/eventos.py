@@ -30,7 +30,7 @@ def lista():
 
 
 @eventos_bp.route("/nuevo", methods=["GET", "POST"])
-@rol_requerido("admin", "profesor")
+@rol_requerido("administrador", "profesor")
 def nuevo():
     if request.method == "POST":
         titulo       = request.form.get("titulo", "").strip()
@@ -58,7 +58,7 @@ def nuevo():
 
 
 @eventos_bp.route("/<int:evento_id>/editar", methods=["GET", "POST"])
-@rol_requerido("admin")
+@rol_requerido("administrador")
 def editar(evento_id):
     evento = Evento.buscar_por_id(evento_id)
     if not evento:
@@ -85,7 +85,7 @@ def editar(evento_id):
 
 
 @eventos_bp.route("/<int:evento_id>/eliminar", methods=["POST"])
-@rol_requerido("admin")
+@rol_requerido("administrador")
 def eliminar(evento_id):
     evento = Evento.buscar_por_id(evento_id)
     if evento:
