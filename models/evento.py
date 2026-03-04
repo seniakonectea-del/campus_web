@@ -53,6 +53,7 @@ class Evento:
         cur.close()
         conn.close()
         return [cls(**r) for r in rows]
+    
 
     @classmethod
     def listar_para_rol(cls, rol):
