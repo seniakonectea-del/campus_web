@@ -2,9 +2,11 @@
 
 Aplicación web para la gestión de usuarios y eventos académicos, desarrollada con **Python + Flask** y **PostgreSQL**.
 
-🔗 **Despliegue en Railway:** `[AÑADIR URL AQUÍ TRAS EL DESPLIEGUE]`  
+🔗 **Despliegue en Railway:** `[(https://campusweb-production.up.railway.app/)]`  
 📦 **Repositorio:** https://github.com/seniakonectea-del/campus_web
 
+USUARIO: admin@campus.com
+CONTRASEÑA: admin123
 ---
 
 ## 📋 Descripción del proyecto
